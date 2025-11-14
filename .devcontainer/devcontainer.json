@@ -1,0 +1,31 @@
+{
+  "name": "cpp",
+  "dockerFile": "Dockerfile",
+
+  "remoteUser": "root",
+
+  "mounts": [
+    "source=${env:HOME}/.ssh,target=/root/.ssh,type=bind,consistency=cached"
+  ],
+
+  "customizations": {
+    "vscode": {
+      "settings": { 
+        "terminal.integrated.shell.linux": "/bin/bash",
+        "cmake.showOptionsMovedNotification": false,
+        "cmake.options.statusBarVisibility": "visible"
+      },
+      "extensions": [
+        "ms-python.python",
+        "ms-azuretools.vscode-docker",
+        "ms-iot.vscode-ros",
+        "twxs.cmake",
+        "dotjoshjohnson.xml",
+        "redhat.vscode-xml",
+        "franneck94.vscode-coding-tools-extension-pack"
+      ]
+    }
+  },
+
+  "postCreateCommand": "git config --global user.email 'andrei.baciu94@gmail.com' && git config --global user.name 'Andrei B'"
+}
