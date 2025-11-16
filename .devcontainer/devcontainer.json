@@ -18,11 +18,8 @@
       "extensions": [
         "ms-python.python",
         "ms-azuretools.vscode-docker",
-        "ms-iot.vscode-ros",
         "twxs.cmake",
-        "dotjoshjohnson.xml",
-        "redhat.vscode-xml",
-        "franneck94.vscode-coding-tools-extension-pack"
+        "ms-vscode.cpptools-extension-pack"
       ]
     }
   },
