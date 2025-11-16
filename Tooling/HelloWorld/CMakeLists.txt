@@ -19,9 +19,14 @@ set(EXEC_NAME "HelloWorldExec")
 
 option(COMPILE_EXECUTABLE "Whether to compile executable" OFF)
 
+
+add_subdirectory(config)
+
 #first target called PrintLib
 add_library(${LIB_NAME} STATIC "src/print.cpp")
-target_include_directories(${LIB_NAME} PUBLIC "include")
+target_include_directories(${LIB_NAME} PUBLIC 
+    "include"
+    "${CMAKE_BINARY_DIR}/config/include")
 
 # compile parts of app bassed on conditions
 if (COMPILE_EXECUTABLE)
