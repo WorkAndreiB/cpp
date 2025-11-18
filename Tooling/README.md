@@ -12,8 +12,13 @@
 + cmake -S <path/to/source> -B <path/to/build> -G "<generator_name>"
 
 ### Create executable 
-+ c make --build <path/to/build>
++ cmake --build <path/to/build>
 
 ### CMake build target
-+ cmake --build <path/to/build> --target <target>
++ cmake --build <path/to/build> --target <target_name>
+
+or option 2 (only works for system where generator is makefile)
+
++ cd build
++ make <target_name>
 
