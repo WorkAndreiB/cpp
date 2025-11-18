@@ -1,4 +1,5 @@
-#pragma once
+#ifndef TOOLING_HELLOWORLD_CONFIG_CONGIF_HPP
+#define TOOLING_HELLOWORLD_CONFIG_CONGIF_HPP
 
 #include<cstdint>
 #include<string_view>
@@ -9,3 +10,6 @@ static constexpr  std::string_view project_version = "@PROJECT_VERSION@";
 static constexpr std::int32_t version_major={@PROJECT_VERSION_MAJOR@};
 static constexpr std::int32_t version_minor={@PROJECT_VERSION_MINOR@};
 static constexpr std::int32_t version_patch={@PROJECT_VERSION_PATCH@};
+
+
+#endif // TOOLING_HELLOWORLD_CONFIG_CONGIF_HPP

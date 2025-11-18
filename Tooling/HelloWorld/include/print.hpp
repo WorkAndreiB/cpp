@@ -1,3 +1,6 @@
-#pragma once
+#ifndef TOOLING_HELLOWORLD_PRINT_HPP
+#define TOOLING_HELLOWORLD_PRINT_HPP
 
 void print_hello();
+
+#endif // TOOLING_HELLOWORLD_PRINT_HPP
