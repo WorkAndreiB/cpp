@@ -17,8 +17,15 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(LIB_NAME "PrintLib")
 set(EXEC_NAME "HelloWorldExec")
 
-option(COMPILE_EXECUTABLE "Whether to compile executable" OFF)
+# set path to where cmake files are located
+set(CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake/")
+# include cmake module file
+include(AddGitSubmodule)
 
+option(COMPILE_EXECUTABLE "Whether to compile executable" ON)
+
+# add submodule
+add_git_submmodule(external/json)
 
 add_subdirectory(config)
 
@@ -34,7 +41,9 @@ if (COMPILE_EXECUTABLE)
     add_executable(${EXEC_NAME} "src/main.cpp")
 
     # link to HelloWorld all needed libraries
-    target_link_libraries(${EXEC_NAME} PUBLIC ${LIB_NAME})
+    target_link_libraries(${EXEC_NAME} PUBLIC 
+        ${LIB_NAME}
+        nlohmann_json)
 else()
     message("W/o exe. compiling")
 endif()
