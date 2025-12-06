@@ -1,15 +1,21 @@
 {
-    // Use IntelliSense to learn about possible attributes.
-    // Hover to view descriptions of existing attributes.
-    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "(gdb) Attach",
+            "name": "Debug modern_cpp/constructors",
             "type": "cppdbg",
-            "request": "attach",
-            "program": "enter program name, for example ${workspaceFolder}/a.out",
+            "request": "launch",
+
+            // Use workspace-relative absolute path
+            "program": "${workspaceFolder}/modern_cpp/constructors/build/ConstructorsExec",
+            "args": [],
+
+            "stopAtEntry": false,
+            "cwd": "${workspaceFolder}/modern_cpp/constructors",
+            "environment": [],
+            "externalConsole": false,
             "MIMode": "gdb",
+
             "setupCommands": [
                 {
                     "description": "Enable pretty-printing for gdb",
@@ -21,8 +27,9 @@
                     "text": "-gdb-set disassembly-flavor intel",
                     "ignoreFailures": true
                 }
-            ]
-        }
+            ],
 
+            "preLaunchTask": "modern_cpp_constructors"
+        }
     ]
 }
