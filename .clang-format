@@ -1,0 +1,58 @@
+# ============================================
+# Clang-Format Configuration for C++ / ROS2
+# ============================================
+
+BasedOnStyle: Google
+Language: Cpp
+
+# Indentation
+IndentWidth: 4
+TabWidth: 4
+UseTab: Never
+
+# Line length
+ColumnLimit: 100
+
+# Braces
+BreakBeforeBraces: Allman     # ROS-style braces
+AllowShortFunctionsOnASingleLine: Empty
+
+# Pointer & Reference alignment
+PointerAlignment: Left
+ReferenceAlignment: Left
+
+# Includes
+SortIncludes: true
+IncludeBlocks: Regroup
+
+# Spacing
+SpaceBeforeParens: ControlStatements
+SpacesInParentheses: false
+SpacesInSquareBrackets: false
+SpaceAfterCStyleCast: true
+
+# Templates
+AlwaysBreakTemplateDeclarations: Yes
+
+# Function formatting
+AllowShortIfStatementsOnASingleLine: Never
+AllowShortLoopsOnASingleLine: false
+
+# Comments
+ReflowComments: true
+
+# Namespace formatting
+CompactNamespaces: false
+NamespaceIndentation: All
+
+# Constructor formatting
+BreakConstructorInitializers: AfterColon
+ConstructorInitializerIndentWidth: 4
+
+# Alignment
+AlignOperands: true
+AlignTrailingComments: true
+AlignAfterOpenBracket: Align
+
+# Macros
+IndentPPDirectives: AfterHash

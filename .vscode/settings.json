@@ -5,13 +5,16 @@
         "**/install": true,
         "**/log": true,
     },
-
     "cmake.configureOnOpen": false,
     "cmake.autoSelectActiveFolder": false,
     "cmake.configureOnEdit": false,
+    "clang-format.executable": "/usr/bin/clang-format",
+    "editor.formatOnSave": true,
     "[cmake]": {
-        "editor.formatOnSave": false,
         "editor.defaultFormatter": "twxs.cmake"
+    },
+    "[cpp]": {
+        "editor.defaultFormatter": "xaver.clang-format"
     },
     "files.associations": {
         "sstream": "cpp",
