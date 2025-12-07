@@ -11,7 +11,7 @@ void print(const std::vector<int>& vec)
     std::cout << "\n";
 }
 
-// possible memory leak if p is explicitly deleted
+// possible memory leak if p is NOT explicitly deleted
 int* f()
 {
     int* p = new int{20};
@@ -47,9 +47,9 @@ int main()
     add_new_line();
 
     int* p = f();
-    std::cout << "*p= " << *p << "\n";
     if (p)
     {
+        std::cout << "*p= " << *p << "\n";
         std::cout << "delete p... \n";
         // WARNING: Dereferencing a pointer after it has been deleted causes undefined behavior!
         delete p;

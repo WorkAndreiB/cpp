@@ -15,6 +15,7 @@ class MyString
         std::cout << "parameter constructor\n";
 
         std::memcpy(data, str, std::min(size - 1, static_cast<int>(strlen(str))));
+        data[size - 1] = '\0';
     }
 
     // copy constructor
@@ -73,6 +74,7 @@ class MyString
             size = other.size;
 
             other.data = nullptr;
+            other.size = 0;
         }
         return *this;
     }
@@ -116,7 +118,7 @@ MyString createString()
 
 int main()
 {
-    // copy constructor not called because of optimizations (copy ellision)
+    // copy constructor not called because of optimizations (copy elision)
     MyString other_str = createString();
     other_str.print();
 
