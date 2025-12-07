@@ -1,0 +1,83 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Debug modern_cpp/constructors",
+            "type": "cppdbg",
+            "request": "launch",
+            // Use workspace-relative absolute path
+            "program": "${workspaceFolder}/modern_cpp/constructors/build/ConstructorsExec",
+            "args": [],
+            "stopAtEntry": false,
+            "cwd": "${workspaceFolder}/modern_cpp/constructors",
+            "environment": [],
+            "externalConsole": false,
+            "MIMode": "gdb",
+            "setupCommands": [
+                {
+                    "description": "Enable pretty-printing for gdb",
+                    "text": "-enable-pretty-printing",
+                    "ignoreFailures": true
+                },
+                {
+                    "description": "Set Disassembly Flavor to Intel",
+                    "text": "-gdb-set disassembly-flavor intel",
+                    "ignoreFailures": true
+                }
+            ],
+            "preLaunchTask": "modern_cpp_constructors"
+        },
+        {
+            "name": "Debug modern_cpp/iterators",
+            "type": "cppdbg",
+            "request": "launch",
+            // Use workspace-relative absolute path
+            "program": "${workspaceFolder}/modern_cpp/insert_iterator/build/InsertIteratorExec",
+            "args": [],
+            "stopAtEntry": false,
+            "cwd": "${workspaceFolder}/modern_cpp/insert_iterator",
+            "environment": [],
+            "externalConsole": false,
+            "MIMode": "gdb",
+            "setupCommands": [
+                {
+                    "description": "Enable pretty-printing for gdb",
+                    "text": "-enable-pretty-printing",
+                    "ignoreFailures": true
+                },
+                {
+                    "description": "Set Disassembly Flavor to Intel",
+                    "text": "-gdb-set disassembly-flavor intel",
+                    "ignoreFailures": true
+                }
+            ],
+            "preLaunchTask": "iterators"
+        },
+        {
+            "name": "Debug modern_cpp/misc",
+            "type": "cppdbg",
+            "request": "launch",
+            // Use workspace-relative absolute path
+            "program": "${workspaceFolder}/modern_cpp/misc/build/MiscExec",
+            "args": [],
+            "stopAtEntry": false,
+            "cwd": "${workspaceFolder}/modern_cpp/misc",
+            "environment": [],
+            "externalConsole": false,
+            "MIMode": "gdb",
+            "setupCommands": [
+                {
+                    "description": "Enable pretty-printing for gdb",
+                    "text": "-enable-pretty-printing",
+                    "ignoreFailures": true
+                },
+                {
+                    "description": "Set Disassembly Flavor to Intel",
+                    "text": "-gdb-set disassembly-flavor intel",
+                    "ignoreFailures": true
+                }
+            ],
+            "preLaunchTask": "misc"
+        }
+    ]
+}

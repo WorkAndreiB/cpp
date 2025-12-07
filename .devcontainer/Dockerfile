@@ -8,6 +8,7 @@ WORKDIR /ros2
 RUN apt-get update && apt-get install -y \
     build-essential \
     gcc \
+    gdb \
     make \
     cmake \
     perl \
@@ -17,8 +18,9 @@ RUN apt-get update && apt-get install -y \
     python3-pip \
     git \ 
     terminator \
+    clang-format \
     && apt-get clean
-    
+
 # Create and activate virtual environment
 RUN python3 -m venv /opt/venv
 
