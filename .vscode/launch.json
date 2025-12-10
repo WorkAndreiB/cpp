@@ -78,6 +78,32 @@
                 }
             ],
             "preLaunchTask": "misc"
+        },
+        {
+            "name": "Debug modern_cpp/smart_ptr",
+            "type": "cppdbg",
+            "request": "launch",
+            // Use workspace-relative absolute path
+            "program": "${workspaceFolder}/modern_cpp/smart_ptr/build/SmartPtrExec",
+            "args": [],
+            "stopAtEntry": false,
+            "cwd": "${workspaceFolder}/modern_cpp/smart_ptr",
+            "environment": [],
+            "externalConsole": false,
+            "MIMode": "gdb",
+            "setupCommands": [
+                {
+                    "description": "Enable pretty-printing for gdb",
+                    "text": "-enable-pretty-printing",
+                    "ignoreFailures": true
+                },
+                {
+                    "description": "Set Disassembly Flavor to Intel",
+                    "text": "-gdb-set disassembly-flavor intel",
+                    "ignoreFailures": true
+                }
+            ],
+            "preLaunchTask": "smart_ptr"
         }
     ]
 }
