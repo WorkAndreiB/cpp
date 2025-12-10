@@ -12,7 +12,7 @@ class Point
     Point(Point&& p);
     Point& operator=(Point&& point);
     Point(const Point& point) = delete;
-    Point& operator=(Point& point) = delete;
+    Point& operator=(const Point& point) = delete;
     ~Point();
 
     void print();

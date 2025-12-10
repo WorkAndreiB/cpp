@@ -13,12 +13,12 @@ void print(std::unique_ptr<Point> point)
 
 std::unique_ptr<Point> create_pointer(int x, int y)
 {
-    return std::make_unique<Point>(Point{x, y});
+    return std::make_unique<Point>(x, y);
 }
 
 int main()
 {
-    auto p = std::make_unique<Point>(Point{10, 20});
+    auto p = std::make_unique<Point>(10, 20);
     p->print();
     print(std::move(p));
 
@@ -43,7 +43,7 @@ int main()
     shapes.push_back(std::make_unique<Shape>());
     shapes.push_back(std::make_unique<Rectangle>());
     shapes.push_back(std::make_unique<Circle>());
-    shapes.push_back(std::make_unique<Rectangle>(Rectangle{}));
+    // example of object slicing
     shapes.push_back(std::make_unique<Shape>(Rectangle{}));
 
     for (const auto& shape : shapes)
@@ -57,6 +57,7 @@ int main()
         {
             p->print();
             std::cout << "Custom unique ptr deleter\n";
+            delete p;
         };
 
         std::unique_ptr<Point, decltype(custom_deleter)> custom_ptr(new Point(100, 200),

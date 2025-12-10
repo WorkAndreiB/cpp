@@ -22,7 +22,7 @@ class A
 
    public:
     ~A();
-    A(const std::shared_ptr<B> other);
+    A(const std::shared_ptr<B>& other);
 };
 
 #endif  // MODERN_CPP_SMART_PTR_DEPENDENCY_HPP

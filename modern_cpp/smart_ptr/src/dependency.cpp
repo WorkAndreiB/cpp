@@ -17,7 +17,7 @@ A::~A()
     std::cout << "~A()\n";
 }
 
-A::A(const std::shared_ptr<B> other)
+A::A(const std::shared_ptr<B>& other)
 {
     std::cout << "A(shared_ptr<B>)\n";
     b = other;

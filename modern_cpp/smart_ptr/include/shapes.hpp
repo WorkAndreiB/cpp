@@ -10,6 +10,7 @@ class Shape
     {
         std::cout << "Shape()\n";
     }
+    virtual ~Shape() = default;
 };
 
 class Rectangle : public Shape
@@ -17,7 +18,7 @@ class Rectangle : public Shape
    public:
     void print() override
     {
-        std::cout << "Recatangle()\n";
+        std::cout << "Rectangle()\n";
     }
 };
 
