@@ -29,6 +29,35 @@ auto greeter(const std::string& salutation)
     return [salutation](const std::string& name) { return salutation + " " + name; };
 }
 
+// variadic templeate arg
+template <typename... Args>
+void f(Args... args)
+{
+    std::cout << "Call with " << sizeof...(args) << " args\n";
+}
+
+template <typename T>
+T add(T x)
+{
+    std::cout << "add(T x)\n";
+    return x;
+}
+
+template <typename T, typename... Args>
+T add(T x, Args... args)
+{
+    std::cout << "add(T x, Args... args)\n";
+
+    return x + add(args...);
+}
+
+template <>
+std::string add<std::string>(std::string x)
+{
+    std::cout << "add<string>(T x)\n";
+    return x + "!";
+}
+
 int main()
 {
     auto add_new_line = []() { std::cout << "\n\n"; };
@@ -56,11 +85,24 @@ int main()
     }
     add_new_line();
 
+    // testing greeter
     auto greet = greeter("Hello");
 
     std::cout << greet("Gigi") << "\n";
 
     std::cout << greeter("Hello")("Mada") << "\n";
+
+    add_new_line();
+
+    // testing variadic templates
+    f(4.0F, "ana are mere", 2U);
+    f(4.0F);
+
+    auto sum = add(1.6, 5.05, 7.8, 20);
+    std::cout << "sum = " << sum << "\n";
+
+    auto result = add(std::string{"unu "}, std::string{"doi "}, std::string{"cinci "});
+    std::cout << "result = " << result << "\n";
 
     return 0;
 }
