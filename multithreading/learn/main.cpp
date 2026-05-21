@@ -27,6 +27,7 @@ void work_with_mutex(int& count, std::mutex& mtx)
 {
     for (auto i = 0; i < 100000; ++i)
     {
+        // work with mutex directly for learning purposes
         mtx.lock();
         ++count;
         mtx.unlock();
@@ -58,8 +59,9 @@ class CallableObject
         }
     }
 
-    int getCount() const
+    int getCount()
     {
+        std::lock_guard<std::mutex> lock(mtx);
         return count;
     }
 };
@@ -91,6 +93,8 @@ int main()
 {
     std::cout << "Starting work..." << std::endl;
 
+    // use jthread for automatic joining and better exception handling in C++20,
+    // but here std::thread is for C++17
     std::thread t1(work, "Task 1", 1);
     std::thread t2(work, "Task 2", 2);
     std::thread t3(
