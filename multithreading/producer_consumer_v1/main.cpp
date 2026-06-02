@@ -1,3 +1,5 @@
+#include <chrono>
+#include <cstdlib>
 #include <iostream>
 #include <mutex>
 #include <queue>
@@ -10,15 +12,16 @@ void producer(std::queue<int>& buffer, std::timed_mutex& mtx, const std::size_t 
     while (std::chrono::steady_clock::now() < end_time)
     {
         // simulate time taken to produce an item
-        // because lock_quard is used, the time taken to produce an item is not included in the
+        // because unique_lock is used, the time taken to produce an item is not included in the
         // critical section, so other thread can access the buffer while the producer is
         // producing an item
         std::this_thread::sleep_for(std::chrono::milliseconds(100));
-        std::lock_guard<std::timed_mutex> lock(mtx);
+        std::unique_lock<std::timed_mutex> lock(mtx);
         if (buffer.size() < max_buffer_size)
         {
             int item = rand() % 100;  // Produce a random item
             buffer.push(item);
+            lock.unlock();
             std::cout << "Produced: " << item << "\n";
         }
         else
