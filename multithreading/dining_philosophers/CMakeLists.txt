@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.22)
 
-project(LearnMultithreading VERSION 1.0.0 LANGUAGES CXX)
+project(DiningPhilosophers VERSION 1.0.0 LANGUAGES C CXX)
 
 #set C++ 17 standard
 set(CMAKE_CXX_STANDARD 17)
@@ -14,6 +14,6 @@ add_compile_options(-Wall -Wextra -Wpedantic)
 
 find_package(Threads REQUIRED)
 
-add_executable(LearnMultithreadingExec "main.cpp")
+add_executable("DiningPhilosophers" "main.cpp")
 
-target_link_libraries(LearnMultithreadingExec PRIVATE Threads::Threads)
+target_link_libraries("DiningPhilosophers" PRIVATE Threads::Threads)
