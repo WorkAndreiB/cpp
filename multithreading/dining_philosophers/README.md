@@ -27,7 +27,7 @@ std::scoped_lock lock(forks.at(philosopher.get_left_fork()),
 
 - `std::scoped_lock` — simultaneous deadlock-safe acquisition of multiple mutexes.
 - `std::lock_guard` — RAII guard for the print mutex.
-- `std::atomic<int>` — lock-free eat counter per philosopher.
+- `std::atomic<int>` — atomic eat counter per philosopher.
 - `std::thread` / `std::this_thread::sleep_for` — thread creation and sleeping.
 
 ## Build and run

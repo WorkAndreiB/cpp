@@ -65,12 +65,13 @@ void print(std::mutex& print_mutex, int philosopher_index, const std::string& me
 {
     std::lock_guard<std::mutex> lock(print_mutex);
     std::cout << "Philosopher " << philosophers[philosopher_index].get_name() << " " << message
-              << std::endl;
+              << "\n";
 }
 
 void dine_and_think(std::mutex& print_mutex, int philosopher_index)
 {
-    while (true)
+    const auto end_time = std::chrono::steady_clock::now() + std::chrono::seconds(10);
+    while (std::chrono::steady_clock::now() < end_time)
     {
         print(print_mutex, philosopher_index, "is_thinking");
         std::this_thread::sleep_for(thinking_time);
