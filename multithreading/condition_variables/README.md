@@ -94,5 +94,5 @@ This ensures a thread re-checks the condition before proceeding even if it wakes
 ```bash
 cmake -S . -B build
 cmake --build build
-./build/ConditionVariablesExec
+./build/ConditionVariables
 ```
