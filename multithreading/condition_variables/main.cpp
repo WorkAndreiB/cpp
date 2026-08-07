@@ -1,15 +1,15 @@
+#include <chrono>
 #include <condition_variable>
 #include <iostream>
+#include <mutex>
 #include <string>
 #include <thread>
 
 std::string data;
 
 std::mutex data_mtx;
-std::mutex completed_mtx;
 
 std::condition_variable data_cv;
-std::condition_variable completed_cv;
 
 bool update_progress = false;
 bool download_completed = false;
@@ -28,14 +28,16 @@ void download_data()
         update_progress = true;  // Set the update progress flag to true
         lock.unlock();
 
-        data_cv.notify_one();  // Notify one waiting thread that data has been updated
+        data_cv.notify_all();  // Notify all waiting threads that data has been updated
     }
 
     std::cout << "Data download completed." << std::endl;
 
-    std::lock_guard<std::mutex> lock(completed_mtx);
-    download_completed = true;  // Set the download completed flag to true
-    completed_cv.notify_one();  // Notify one waiting thread that download is completed
+    {
+        std::lock_guard<std::mutex> lock(data_mtx);
+        download_completed = true;  // Set the download completed flag to true
+    }
+    data_cv.notify_all();  // Notify all waiting threads that download is completed
 }
 
 void progress_bar()
@@ -44,31 +46,22 @@ void progress_bar()
     {
         std::cout << "Progress bar thread is waiting for data update..." << std::endl;
 
-        // Wait for either data update
+        std::unique_lock<std::mutex> lock(data_mtx);
+        data_cv.wait(lock, []() { return update_progress || download_completed; });
+
+        if (update_progress)
         {
-            std::unique_lock<std::mutex> lock(data_mtx);
-            data_cv.wait(
-                lock,
-                []() { return update_progress; });  // Wait for the update progress flag to be true
-
             std::size_t data_size = data.size();
-
             std::cout << "Progress bar thread received data update. Current data size: "
                       << data_size << std::endl;
-
             update_progress = false;  // Reset the update progress flag
         }
 
-        // Check if download is completed
+        if (download_completed)
         {
-            std::unique_lock<std::mutex> lock(completed_mtx);
-            if (completed_cv.wait_for(lock, std::chrono::milliseconds(100),
-                                      []() { return download_completed; }))
-            {
-                std::cout << "Progress bar thread detected download completion. Exiting..."
-                          << std::endl;
-                break;  // Exit the loop if download is completed
-            }
+            std::cout << "Progress bar thread detected download completion. Exiting..."
+                      << std::endl;
+            break;  // Exit the loop if download is completed
         }
     }
 }
@@ -80,14 +73,11 @@ void process_data()
 
     // Wait for download completion
     {
-        std::unique_lock<std::mutex> lock(completed_mtx);
-        completed_cv.wait(
+        std::unique_lock<std::mutex> lock(data_mtx);
+        data_cv.wait(
             lock, []()
             { return download_completed; });  // Wait for the download completed flag to be true
-    }
 
-    {
-        std::unique_lock<std::mutex> lock(data_mtx);
         std::cout << "Copying downloaded data for processing..." << std::endl;
         copy_data = data;  // Copy the downloaded data for processing
     }
