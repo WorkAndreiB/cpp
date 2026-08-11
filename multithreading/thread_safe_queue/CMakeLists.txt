@@ -20,7 +20,6 @@ install(TARGETS ThreadSafeQueue
         ARCHIVE DESTINATION lib
         LIBRARY DESTINATION lib
         RUNTIME DESTINATION bin
-        DESTINATION lib
 )
 
 install(DIRECTORY include/ DESTINATION include)
