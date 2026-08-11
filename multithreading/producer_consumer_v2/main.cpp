@@ -1,8 +1,6 @@
 #include <chrono>
-#include <cstdlib>
 #include <iostream>
-#include <mutex>
-#include <queue>
+#include <random>
 #include <thread>
 #include <vector>
 
@@ -17,7 +15,9 @@ void producer(ThreadSafeQueue& buffer)
         // simulate time taken to produce an item
         std::this_thread::sleep_for(std::chrono::milliseconds(100));
 
-        int item = std::rand() % 100;  // produce a random item
+        static thread_local std::mt19937 rng{std::random_device{}()};
+        static thread_local std::uniform_int_distribution<int> dist(0, 99);
+        int item = dist(rng);  // produce a random item
         buffer.push(item);
         buffer.print();
     }
