@@ -1,8 +1,9 @@
+#ifndef THREAD_SAFE_QUEUE_HPP
+#define THREAD_SAFE_QUEUE_HPP
+
+#include <cstddef>
 #include <list>
 #include <mutex>
-
-#ifndef THREAD_SAFE_QUEUE_HPP
-#    define THREAD_SAFE_QUEUE_HPP
 
 /**
  * @brief A thread-safe FIFO queue backed by a mutex.
