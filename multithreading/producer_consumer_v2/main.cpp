@@ -8,26 +8,19 @@
 
 #include "thread_safe_queue.hpp"
 
-void producer(ThreadSafeQueue& buffer, const std::size_t max_buffer_size)
+void producer(ThreadSafeQueue& buffer)
 {
     auto start_time = std::chrono::steady_clock::now();
     auto end_time = start_time + std::chrono::seconds(10);
     while (std::chrono::steady_clock::now() < end_time)
     {
         // simulate time taken to produce an item
-        std::this_thread::sleep_for(std::chrono::milliseconds(50));
-        if (buffer.size() < max_buffer_size)
-        {
-            int item = std::rand() % 100;  // produce a random item
-            buffer.push(item);
-            buffer.print();
-        }
-        else
-        {
-            std::cout << "Buffer is full, producer is waiting...\n";
-        }
+        std::this_thread::sleep_for(std::chrono::milliseconds(100));
+
+        int item = std::rand() % 100;  // produce a random item
+        buffer.push(item);
+        buffer.print();
     }
-    std::cout << "Producer finished producing items.\n";
 }
 
 void consumer(ThreadSafeQueue& buffer)
@@ -37,34 +30,32 @@ void consumer(ThreadSafeQueue& buffer)
 
     while (std::chrono::steady_clock::now() < end_time)
     {
-        if (buffer.size() > 0)
+        try
         {
             buffer.pop();
             buffer.print();
         }
-        else
+        catch (const std::exception& e)
         {
-            std::cout << "Buffer is empty, consumer is waiting...\n";
+            std::cerr << e.what() << '\n';
         }
-        // simulate time taken to consume an item
-        std::this_thread::sleep_for(std::chrono::milliseconds(200));
+
+        std::this_thread::sleep_for(std::chrono::milliseconds(210));
     }
-    std::cout << "Consumer finished consuming items.\n";
 }
 
 int main()
 {
     ThreadSafeQueue buffer;
-    const std::size_t max_buffer_size = 10;
 
     std::vector<std::thread> workers;
 
     constexpr int num_producers = 2;
-    constexpr int num_consumers = 5;
+    constexpr int num_consumers = 4;
 
     for (int i = 0; i < num_producers; ++i)
     {
-        workers.emplace_back(producer, std::ref(buffer), max_buffer_size);
+        workers.emplace_back(producer, std::ref(buffer));
     }
 
     for (int i = 0; i < num_consumers; ++i)
