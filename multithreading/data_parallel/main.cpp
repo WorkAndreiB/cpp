@@ -37,25 +37,23 @@ int main()
     std::mt19937 gen(rd());
     std::uniform_int_distribution<> dis(1, 100);
 
+    std::cout << "Generating random data..." << std::endl;
     for (auto &d : data)
         d = dis(gen);
 
-    // std::cout << "Generated data: ";
-    // for (const auto &d : data)
-    //     std::cout << d << " ";
-    // std::cout << std::endl;
-
+    // Calculate sum in parallel using multiple threads
     auto start_time = std::chrono::high_resolution_clock::now();
     std::cout << "Sum: " << add_parallel(data) << std::endl;
     auto end_time = std::chrono::high_resolution_clock::now();
     std::chrono::duration<double> elapsed = end_time - start_time;
-    std::cout << "Elapsed time: " << elapsed.count() << " seconds" << std::endl;
+    std::cout << "Elapsed time parallel: " << elapsed.count() << " seconds" << std::endl;
 
+    // Calculate sum sequentially for comparison
     start_time = std::chrono::high_resolution_clock::now();
     auto sum = std::accumulate(data.begin(), data.end(), 0);
     std::cout << "Sum: " << sum << std::endl;
     end_time = std::chrono::high_resolution_clock::now();
     elapsed = end_time - start_time;
-    std::cout << "Elapsed time: " << elapsed.count() << " seconds" << std::endl;
+    std::cout << "Elapsed time sequential: " << elapsed.count() << " seconds" << std::endl;
     return 0;
 }
