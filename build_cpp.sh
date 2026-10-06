@@ -10,8 +10,13 @@ build(){
     # check if build directory exists
     if [ ! -d "$component/build/" ]; then
         echo "Build directory does not exist. Creating it."
-        mkdir -p "$component/build/"
+        # create the build directory if it doesn't exist. use || exit $? to stop the script if mkdir fails
+        mkdir -p "$component/build/" || exit $?
     fi
+
+    # request the CMake file API codemodel so the evaluated executable path can be read after configuring
+    mkdir -p "$component/build/.cmake/api/v1/query" || exit $?
+    touch "$component/build/.cmake/api/v1/query/codemodel-v2" || exit $?
 
     # build components
     cmake -S "$component" -B "$component/build/"
@@ -25,10 +30,10 @@ get_executable_name(){
     # ^ This indicates the start of the line in the CMake file
     # [[:space:]]* This means zero or more whitespace characters. This allows indentation
     # \( ... \) is used to create a capture group in the regular expression
-    # [^[:space:])]* Match characters until you encounter whitespace or )
+    # Optional double quotes around the target name are excluded from the capture.
     # .* Match the rest of the line
     # \1 refers to the first capture group, which is the executable name
-    exec_name=$(sed -n 's/^[[:space:]]*add_executable[[:space:]]*(\([^[:space:])]*\).*/\1/p' "$path")
+    exec_name=$(sed -n 's/^[[:space:]]*add_executable[[:space:]]*("\?\([^"[:space:])]*\)"\?.*/\1/p' "$path")
     echo "$exec_name"
 }
 
@@ -90,5 +95,3 @@ main() {
 
 # use "$@" to pass all script arguments to the main function
 main "$@"
-
-
