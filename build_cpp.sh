@@ -1,15 +1,14 @@
 #!/bin/bash
 
-# define build function
+# usecases 
+# ./build_cpp.sh [-e] components
+# ./build_cpp.sh -h 
+
 build(){
     component=$1
 
-    echo "Building component: $component"
-
     # check if build directory exists
-    if [ -d "$component/build/" ]; then
-        echo "Build directory exists."
-    else
+    if [ ! -d "$component/build/" ]; then
         echo "Build directory does not exist. Creating it."
         mkdir -p "$component/build/"
     fi
@@ -19,23 +18,77 @@ build(){
     cmake --build "$component/build/"
 }
 
-# define help function
-help(){
-    echo "Usage: $0 <component> [-e <executable_name>]"
-    echo "  <component>   The component to build."
-    echo "  -e <executable_name>   Optional. Execute the specified executable after building."
+get_executable_name(){
+    path=$1
+
+    # Extract the executable name from the CMake file
+    # ^ This indicates the start of the line in the CMake file
+    # [[:space:]]* This means zero or more whitespace characters. This allows indentation
+    # \( ... \) is used to create a capture group in the regular expression
+    # [^[:space:])]* Match characters until you encounter whitespace or )
+    # .* Match the rest of the line
+    # \1 refers to the first capture group, which is the executable name
+    exec_name=$(sed -n 's/^[[:space:]]*add_executable[[:space:]]*(\([^[:space:])]*\).*/\1/p' "$path")
+    echo "$exec_name"
 }
 
-if [ $# -eq 1 ]; then
-    # calling build with "$1" and not $1 because I want to preserve any spaces in the component name
-    build "$1"
-elif [ $# -eq 3 ]; then
-    echo "build $1 and execute"
-    build "$1"
-    echo "Executing component: $1"
-    ./"$1/build/$3"
-else
-    help "$1" "$3"
-    exit 1
-fi
+execute(){
+    component=$1
+    if [ -f "$component/CMakeLists.txt" ]; then
+        exec_name=$(get_executable_name "$component/CMakeLists.txt")
+        ./"$component/build/$exec_name"
+    else
+        echo "CMakeLists.txt not found for component: $component"
+    fi
+}
+
+help(){
+    echo "Usage: [option] <component>
+            -b      Build component without executing
+            -e      Run executable after building
+            -h      Display this help message."
+}
+
+check_for_component(){
+    if [ -z "$1" ]; then
+        echo "Error: No component specified."
+        exit 1
+    fi
+}
+
+
+main() {
+    # print help if no arguments are provided
+    if [ $# -eq 0 ]; then
+        help
+        exit 1
+    fi
+
+    case "$1" in
+        -h|--help) 
+            help
+            exit 0
+            ;;
+        -e)
+            check_for_component "$2"
+            echo "building and executing component: $2"
+            build "$2"
+            execute "$2"
+            ;;
+        -b)
+            check_for_component "$2"
+            echo "building component: $2"
+            build "$2"
+            ;;
+        *)
+            echo "Error: Unknown option $1"
+            help
+            exit 1
+            ;;
+    esac
+}
+
+# use "$@" to pass all script arguments to the main function
+main "$@"
+
 
