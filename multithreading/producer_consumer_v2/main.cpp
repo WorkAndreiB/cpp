@@ -6,11 +6,11 @@
 
 #include "thread_safe_queue.hpp"
 
-void producer(ThreadSafeQueue& buffer)
+using Buffer = ThreadSafeQueue<int, 5>;
+
+void producer(Buffer& buffer)
 {
-    auto start_time = std::chrono::steady_clock::now();
-    auto end_time = start_time + std::chrono::seconds(10);
-    while (std::chrono::steady_clock::now() < end_time)
+    for (int i = 0; i < 20; ++i)
     {
         // simulate time taken to produce an item
         std::this_thread::sleep_for(std::chrono::milliseconds(100));
@@ -23,12 +23,9 @@ void producer(ThreadSafeQueue& buffer)
     }
 }
 
-void consumer(ThreadSafeQueue& buffer)
+void consumer(Buffer& buffer)
 {
-    auto start_time = std::chrono::steady_clock::now();
-    auto end_time = start_time + std::chrono::seconds(10);  // Run the consumer for 10 seconds
-
-    while (std::chrono::steady_clock::now() < end_time)
+    for (int i = 0; i < 20; ++i)
     {
         try
         {
@@ -46,11 +43,11 @@ void consumer(ThreadSafeQueue& buffer)
 
 int main()
 {
-    ThreadSafeQueue buffer;
+    Buffer buffer;
 
     std::vector<std::thread> workers;
 
-    constexpr int num_producers = 2;
+    constexpr int num_producers = 4;
     constexpr int num_consumers = 4;
 
     for (int i = 0; i < num_producers; ++i)
