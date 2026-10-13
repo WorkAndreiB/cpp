@@ -29,20 +29,18 @@ class ThreadSafeQueue
     ThreadSafeQueue& operator=(ThreadSafeQueue&&) = delete;
 
     /// @brief Pushes a value onto the back of the queue.
-    /// @param value The integer to enqueue.
+    /// @param value The value to enqueue.
     void push(T value)
     {
         std::unique_lock<std::mutex> lock(mutex_);
-        full_queue_cond_var.wait(
-            lock, [this] { return list_.size() < max_size_; });  // Example max size of 100
+        full_queue_cond_var.wait(lock, [this] { return list_.size() < max_size_; });
         list_.push_back(value);
         empty_queue_cond_var.notify_one();
     }
 
     /**
-     * @brief Removes and returns the front element.
-     * @return The integer at the front of the queue.
-     * @throws std::runtime_error if the queue is empty.
+     * @brief Blocks until an element is available, then removes and returns it.
+     * @return The value at the front of the queue.
      */
     T pop()
     {
@@ -67,6 +65,7 @@ class ThreadSafeQueue
 
    private:
     std::list<T> list_;
+    static_assert(MaxSize > 0, "ThreadSafeQueue MaxSize must be greater than zero");
     static constexpr size_t max_size_ = MaxSize;
     std::mutex mutex_;
     std::condition_variable empty_queue_cond_var;

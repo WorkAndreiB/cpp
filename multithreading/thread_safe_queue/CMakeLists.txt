@@ -13,7 +13,6 @@ add_compile_options(-Wall -Wextra -Wpedantic)
 add_library(ThreadSafeQueue INTERFACE)
 
 target_link_libraries(ThreadSafeQueue INTERFACE Threads::Threads)
-target_compile_features(ThreadSafeQueue INTERFACE cxx_std_17)
 
 target_include_directories(ThreadSafeQueue INTERFACE
     ${CMAKE_CURRENT_SOURCE_DIR}/include
