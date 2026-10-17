@@ -1,0 +1,189 @@
+[1mdiff --git a/multithreading/thread_pool/CMakeLists.txt b/multithreading/thread_pool/CMakeLists.txt[m
+[1mindex bd2ecb5..f952fea 100644[m
+[1m--- a/multithreading/thread_pool/CMakeLists.txt[m
+[1m+++ b/multithreading/thread_pool/CMakeLists.txt[m
+[36m@@ -3,14 +3,14 @@[m [mcmake_minimum_required(VERSION 3.22)[m
+ project(ThreadPool VERSION 1.0.0 LANGUAGES C CXX)[m
+ [m
+ #set C++ 17 standard[m
+[31m-set(CMAKE_CXX_STANDARD 17)[m
+[32m+[m[32mset(CMAKE_CXX_STANDARD 20)[m
+ set(CMAKE_CXX_STANDARD_REQUIRED ON)[m
+ [m
+ if(NOT CMAKE_BUILD_TYPE)[m
+     set(CMAKE_BUILD_TYPE Debug)[m
+ endif()[m
+ [m
+[31m-add_compile_options(-Wall -Wextra -Wpedantic)[m
+[32m+[m[32madd_compile_options(-Wall -Wextra -Wpedantic -Werror)[m
+ [m
+ find_package(Threads REQUIRED)[m
+ [m
+[1mdiff --git a/multithreading/thread_pool/include/ThreadPool.hpp b/multithreading/thread_pool/include/ThreadPool.hpp[m
+[1mindex b9819f5..46fd489 100644[m
+[1m--- a/multithreading/thread_pool/include/ThreadPool.hpp[m
+[1m+++ b/multithreading/thread_pool/include/ThreadPool.hpp[m
+[36m@@ -1,7 +1,6 @@[m
+ #ifndef THREADPOOL_HPP[m
+ #define THREADPOOL_HPP[m
+ [m
+[31m-#include <atomic>[m
+ #include <functional>[m
+ #include <thread>[m
+ #include <thread_safe_queue.hpp>[m
+[36m@@ -15,7 +14,6 @@[m [mclass ThreadPool[m
+     ThreadSafeQueue<Task, 5> task_queue;[m
+     std::vector<std::thread> threads;[m
+     int thread_count;[m
+[31m-    std::atomic<bool> shutdown{false};[m
+ [m
+     void DoWork();[m
+ [m
+[1mdiff --git a/multithreading/thread_pool/src/ThreadPool.cpp b/multithreading/thread_pool/src/ThreadPool.cpp[m
+[1mindex 0596b9a..df8bfdb 100644[m
+[1m--- a/multithreading/thread_pool/src/ThreadPool.cpp[m
+[1m+++ b/multithreading/thread_pool/src/ThreadPool.cpp[m
+[36m@@ -1,5 +1,8 @@[m
+ #include "ThreadPool.hpp"[m
+ [m
+[32m+[m[32m#include <stdexcept>[m
+[32m+[m[32m#include <utility>[m
+[32m+[m
+ ThreadPool::ThreadPool(int thread_count) : thread_count(thread_count)[m
+ {[m
+     for (int i = 0; i < thread_count; ++i)[m
+[36m@@ -11,6 +14,7 @@[m [mThreadPool::ThreadPool(int thread_count) : thread_count(thread_count)[m
+ ThreadPool::~ThreadPool()[m
+ {[m
+     std::cout << "Destroying ThreadPool" << std::endl;[m
+[32m+[m[32m    Shutdown();[m
+     for (auto &thread : threads)[m
+     {[m
+         if (thread.joinable())[m
+[36m@@ -23,19 +27,26 @@[m [mThreadPool::~ThreadPool()[m
+ [m
+ void ThreadPool::DoWork()[m
+ {[m
+[31m-    while (!shutdown)[m
+[32m+[m[32m    while (true)[m
+     {[m
+         auto task = task_queue.pop();[m
+[31m-        task();[m
+[32m+[m[32m        if (!task)[m
+[32m+[m[32m        {[m
+[32m+[m[32m            return;[m
+[32m+[m[32m        }[m
+[32m+[m[32m        (*task)();[m
+     }[m
+ }[m
+ [m
+ void ThreadPool::AddTask(std::function<void()> task)[m
+ {[m
+[31m-    task_queue.push(task);[m
+[32m+[m[32m    if (!task_queue.push(std::move(task)))[m
+[32m+[m[32m    {[m
+[32m+[m[32m        throw std::logic_error("Cannot add a task to a shut down ThreadPool");[m
+[32m+[m[32m    }[m
+ }[m
+ [m
+ void ThreadPool::Shutdown()[m
+ {[m
+[31m-    shutdown = true;[m
+[32m+[m[32m    task_queue.close();[m
+ }[m
+\ No newline at end of file[m
+[1mdiff --git a/multithreading/thread_safe_queue/include/thread_safe_queue.hpp b/multithreading/thread_safe_queue/include/thread_safe_queue.hpp[m
+[1mindex e9e682c..deaa123 100644[m
+[1m--- a/multithreading/thread_safe_queue/include/thread_safe_queue.hpp[m
+[1m+++ b/multithreading/thread_safe_queue/include/thread_safe_queue.hpp[m
+[36m@@ -6,6 +6,8 @@[m
+ #include <iostream>[m
+ #include <list>[m
+ #include <mutex>[m
+[32m+[m[32m#include <optional>[m
+[32m+[m[32m#include <utility>[m
+ [m
+ /**[m
+  * @brief A thread-safe FIFO queue[m
+[36m@@ -15,7 +17,8 @@[m
+  * @tparam T The type of elements stored in the queue.[m
+  * @tparam MaxSize The maximum number of elements the queue can hold.[m
+  *[m
+[31m- * @note This queue blocks on push when full and on pop when empty.[m
+[32m+[m[32m * @note This queue blocks on push when full and on pop when empty. Calling close()[m
+[32m+[m[32m *       wakes blocked operations; pop() drains queued values before returning empty.[m
+  *[m
+  */[m
+ template <typename T, size_t MaxSize>[m
+[36m@@ -35,28 +38,55 @@[m [mclass ThreadSafeQueue[m
+ [m
+     /// @brief Pushes a value onto the back of the queue.[m
+     /// @param value The value to enqueue.[m
+[31m-    void push(T value)[m
+[32m+[m[32m    /// @return false if the queue has been closed.[m
+[32m+[m[32m    bool push(T value)[m
+     {[m
+         std::unique_lock<std::mutex> lock(mutex_);[m
+[31m-        full_queue_cond_var.wait(lock, [this] { return list_.size() < max_size_; });[m
+[31m-        list_.push_back(value);[m
+[32m+[m[32m        full_queue_cond_var.wait(lock, [this] { return list_.size() < max_size_ || closed_; });[m
+[32m+[m[32m        if (closed_)[m
+[32m+[m[32m        {[m
+[32m+[m[32m            return false;[m
+[32m+[m[32m        }[m
+[32m+[m
+[32m+[m[32m        list_.push_back(std::move(value));[m
+         empty_queue_cond_var.notify_one();[m
+[32m+[m[32m        return true;[m
+     }[m
+ [m
+     /**[m
+[31m-     * @brief Blocks until an element is available, then removes and returns it.[m
+[31m-     * @return The value at the front of the queue.[m
+[32m+[m[32m     * @brief Blocks until an element is available or the queue is closed.[m
+[32m+[m[32m     * @return The next value, or an empty optional when closed and drained.[m
+      */[m
+[31m-    T pop()[m
+[32m+[m[32m    std::optional<T> pop()[m
+     {[m
+         std::unique_lock<std::mutex> lock(mutex_);[m
+[31m-        empty_queue_cond_var.wait(lock, [this] { return !list_.empty(); });[m
+[31m-        T value = list_.front();[m
+[32m+[m[32m        empty_queue_cond_var.wait(lock, [this] { return !list_.empty() || closed_; });[m
+[32m+[m[32m        if (list_.empty())[m
+[32m+[m[32m        {[m
+[32m+[m[32m            return std::nullopt;[m
+[32m+[m[32m        }[m
+[32m+[m
+[32m+[m[32m        T value = std::move(list_.front());[m
+         list_.pop_front();[m
+         full_queue_cond_var.notify_one();[m
+         return value;[m
+     }[m
+ [m
+[32m+[m[32m    /**[m
+[32m+[m[32m     * @brief Closes the queue and wakes all blocked push() and pop() calls.[m
+[32m+[m[32m     *[m
+[32m+[m[32m     * Values already in the queue remain available to pop(). Further pushes fail.[m
+[32m+[m[32m     */[m
+[32m+[m[32m    void close()[m
+[32m+[m[32m    {[m
+[32m+[m[32m        {[m
+[32m+[m[32m            std::lock_guard<std::mutex> lock(mutex_);[m
+[32m+[m[32m            closed_ = true;[m
+[32m+[m[32m        }[m
+[32m+[m[32m        empty_queue_cond_var.notify_all();[m
+[32m+[m[32m        full_queue_cond_var.notify_all();[m
+[32m+[m[32m    }[m
+[32m+[m
+     /// @brief Prints all elements in the queue to stdout.[m
+     void print()[m
+     {[m
+[36m@@ -81,6 +111,7 @@[m [mclass ThreadSafeQueue[m
+     std::mutex mutex_;[m
+     std::condition_variable empty_queue_cond_var;[m
+     std::condition_variable full_queue_cond_var;[m
+[32m+[m[32m    bool closed_ = false;[m
+ };[m
+ [m
+ #endif  // THREAD_SAFE_QUEUE_HPP[m
