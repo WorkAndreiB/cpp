@@ -8,10 +8,15 @@
 #include <mutex>
 
 /**
- * @brief A thread-safe FIFO queue backed by a mutex.
+ * @brief A thread-safe FIFO queue
  *
  * All public methods are safe to call concurrently from multiple threads.
- * This queue has a maximum size specified by the template parameter MaxSize.
+ *
+ * @tparam T The type of elements stored in the queue.
+ * @tparam MaxSize The maximum number of elements the queue can hold.
+ *
+ * @note This queue blocks on push when full and on pop when empty.
+ *
  */
 template <typename T, size_t MaxSize>
 class ThreadSafeQueue
@@ -61,6 +66,12 @@ class ThreadSafeQueue
             std::cout << *it << " ";
         }
         std::cout << "\n";
+    }
+
+    bool empty()
+    {
+        std::lock_guard<std::mutex> lock(mutex_);
+        return list_.empty();
     }
 
    private:
