@@ -1,7 +1,6 @@
 #ifndef THREADPOOL_HPP
 #define THREADPOOL_HPP
 
-#include <atomic>
 #include <functional>
 #include <thread>
 #include <thread_safe_queue.hpp>
@@ -15,7 +14,6 @@ class ThreadPool
     ThreadSafeQueue<Task, 5> task_queue;
     std::vector<std::thread> threads;
     int thread_count;
-    std::atomic<bool> shutdown{false};
 
     void DoWork();
 

@@ -1,5 +1,8 @@
 #include "ThreadPool.hpp"
 
+#include <stdexcept>
+#include <utility>
+
 ThreadPool::ThreadPool(int thread_count) : thread_count(thread_count)
 {
     for (int i = 0; i < thread_count; ++i)
@@ -11,6 +14,7 @@ ThreadPool::ThreadPool(int thread_count) : thread_count(thread_count)
 ThreadPool::~ThreadPool()
 {
     std::cout << "Destroying ThreadPool" << std::endl;
+    Shutdown();
     for (auto &thread : threads)
     {
         if (thread.joinable())
@@ -23,19 +27,26 @@ ThreadPool::~ThreadPool()
 
 void ThreadPool::DoWork()
 {
-    while (!shutdown)
+    while (true)
     {
         auto task = task_queue.pop();
-        task();
+        if (!task.has_value())
+        {
+            return;
+        }
+        task.value()();
     }
 }
 
 void ThreadPool::AddTask(std::function<void()> task)
 {
-    task_queue.push(task);
+    if (!task_queue.push(std::move(task)))
+    {
+        throw std::logic_error("Cannot add a task to a shut down ThreadPool");
+    }
 }
 
 void ThreadPool::Shutdown()
 {
-    shutdown = true;
+    task_queue.close();
 }

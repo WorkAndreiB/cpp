@@ -18,8 +18,6 @@ int main()
 
     auto pool = ThreadPool(6);
 
-    // TODO: Find a fix for this.
-    // If there are more threads than tasks, some threads will block waiting for tasks.
     pool.AddTask(task);
     pool.AddTask(other_task);
     pool.AddTask(other_task);
