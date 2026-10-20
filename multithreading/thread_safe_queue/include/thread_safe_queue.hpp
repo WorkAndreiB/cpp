@@ -6,12 +6,20 @@
 #include <iostream>
 #include <list>
 #include <mutex>
+#include <optional>
+#include <utility>
 
 /**
- * @brief A thread-safe FIFO queue backed by a mutex.
+ * @brief A thread-safe FIFO queue
  *
  * All public methods are safe to call concurrently from multiple threads.
- * This queue has a maximum size specified by the template parameter MaxSize.
+ *
+ * @tparam T The type of elements stored in the queue.
+ * @tparam MaxSize The maximum number of elements the queue can hold.
+ *
+ * @note This queue blocks on push when full and on pop when empty. Calling close()
+ *       wakes blocked operations; pop() drains queued values before returning empty.
+ *
  */
 template <typename T, size_t MaxSize>
 class ThreadSafeQueue
@@ -30,26 +38,53 @@ class ThreadSafeQueue
 
     /// @brief Pushes a value onto the back of the queue.
     /// @param value The value to enqueue.
-    void push(T value)
+    /// @return False if trying to push to a closed queue.
+    bool push(T value)
     {
         std::unique_lock<std::mutex> lock(mutex_);
-        full_queue_cond_var.wait(lock, [this] { return list_.size() < max_size_; });
-        list_.push_back(value);
+        full_queue_cond_var.wait(lock, [this] { return list_.size() < max_size_ || closed_; });
+        if (closed_)
+        {
+            return false;
+        }
+
+        list_.push_back(std::move(value));
         empty_queue_cond_var.notify_one();
+        return true;
     }
 
     /**
-     * @brief Blocks until an element is available, then removes and returns it.
-     * @return The value at the front of the queue.
+     * @brief Blocks until an element is available or the queue is closed.
+     * @return The next value, or an empty optional when closed and drained.
      */
-    T pop()
+    std::optional<T> pop()
     {
         std::unique_lock<std::mutex> lock(mutex_);
-        empty_queue_cond_var.wait(lock, [this] { return !list_.empty(); });
-        T value = list_.front();
+        empty_queue_cond_var.wait(lock, [this] { return !list_.empty() || closed_; });
+        if (list_.empty())
+        {
+            return std::nullopt;
+        }
+
+        T value = std::move(list_.front());
         list_.pop_front();
         full_queue_cond_var.notify_one();
         return value;
+    }
+
+    /**
+     * @brief Closes the queue and wakes all blocked push() and pop() calls.
+     *
+     * Values already in the queue remain available to pop(). Further pushes fail.
+     */
+    void close()
+    {
+        {
+            std::lock_guard<std::mutex> lock(mutex_);
+            closed_ = true;
+        }
+        empty_queue_cond_var.notify_all();
+        full_queue_cond_var.notify_all();
     }
 
     /// @brief Prints all elements in the queue to stdout.
@@ -63,6 +98,12 @@ class ThreadSafeQueue
         std::cout << "\n";
     }
 
+    bool empty()
+    {
+        std::lock_guard<std::mutex> lock(mutex_);
+        return list_.empty();
+    }
+
    private:
     std::list<T> list_;
     static_assert(MaxSize > 0, "ThreadSafeQueue MaxSize must be greater than zero");
@@ -70,6 +111,7 @@ class ThreadSafeQueue
     std::mutex mutex_;
     std::condition_variable empty_queue_cond_var;
     std::condition_variable full_queue_cond_var;
+    bool closed_ = false;
 };
 
 #endif  // THREAD_SAFE_QUEUE_HPP
