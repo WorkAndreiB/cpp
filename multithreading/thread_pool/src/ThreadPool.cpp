@@ -5,6 +5,10 @@
 
 ThreadPool::ThreadPool(int thread_count) : thread_count(thread_count)
 {
+    if (thread_count <= 0)
+    {
+        throw std::invalid_argument("thread_count must be greater than zero");
+    }
     for (int i = 0; i < thread_count; ++i)
     {
         threads.emplace_back(&ThreadPool::DoWork, this);
